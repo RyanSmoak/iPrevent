@@ -3,6 +3,7 @@ import joblib
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import shap
+from recommendations import generate_recommendations
 
 app = Flask(__name__)
 
@@ -51,11 +52,16 @@ def predict():
     # Convert the top 3 SHAP values to percentages
     top_3_features_percentage = (top_3_features_df / top_3_features_df.sum(axis=1).values.reshape(-1, 1)) * 100
 
+    #Generate recommendations
+    top_3_features = top_3_features_df.columns
+    recommendations = generate_recommendations(top_3_features, prediction)
+
     result = {
         'prediction':prediction,
         'prediction_proba': prediction_proba,
         'highest_class_proba': max(prediction_proba),
-        'top_3_features': top_3_features_percentage.to_dict(orient='records')[0]
+        'top_3_features': top_3_features_percentage.to_dict(orient='records')[0],
+        'recommendations': recommendations
     }
 
     return jsonify(result)
